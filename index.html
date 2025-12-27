@@ -1,0 +1,1054 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <meta charset="utf-8">
+    <title>Şehir İçi Turistik Rota</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3C!-- Sarı Dış Çember --%3E%3Ccircle cx='256' cy='256' r='230' fill='none' stroke='%23FFD700' stroke-width='50'/%3E%3C!-- Kırmızı İbre (Kuzey) --%3E%3Cpath d='M256 86 L356 256 L156 256 Z' fill='%23ef4444' transform='rotate(45 256 256)'/%3E%3C!-- Sarı İbre (Güney - İçi Boş) --%3E%3Cpath d='M256 426 L356 256 L156 256 Z' fill='none' stroke='%23FFD700' stroke-width='35' transform='rotate(45 256 256)'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --bg-color: #f0f2f5;
+            --text-color: #2b2d42;
+            --success: #10b981;
+            --danger: #ef4444;
+            --info: #0ea5e9;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(rgba(20, 30, 48, 0.72), rgba(36, 59, 85, 0.72)), url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1920&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+       
+        .brand-container {
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 18px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            font-size: 30px;
+            color: var(--primary);
+            background: rgba(67, 97, 238, 0.12);
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,.25);
+            backdrop-filter: blur(8px);
+        }
+
+        .brand-text {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: #f8fafc;
+            text-shadow: 0 10px 30px rgba(0,0,0,.25);
+        }
+
+        .slogan {
+            font-size: 14px;
+            font-weight: 400;
+            color: rgba(248, 250, 252, 0.75);
+            margin-top: 6px;
+            margin-left: 65px;
+            font-style: italic;
+        }
+
+        .wrap {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            align-items: stretch;
+        }
+
+        
+        .panel {
+            flex: 0 0 360px;
+            padding: 26px;
+            border-radius: 18px;
+            background: rgba(255,255,255,.78);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,.35);
+            box-shadow: 0 18px 50px rgba(0,0,0,0.18);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #map {
+            flex: 1;
+            min-height: 640px;
+            border-radius: 18px;
+            box-shadow: 0 18px 50px rgba(0,0,0,0.18);
+            border: 4px solid rgba(255,255,255,.65);
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            margin-top: 14px;
+            display: block;
+            color: rgba(43,45,66,.65);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+
+            label:first-child {
+                margin-top: 0;
+            }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(233,236,239,.9);
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            box-sizing: border-box;
+            background: rgba(255,255,255,.85);
+        }
+
+            input:focus, select:focus {
+                outline: none;
+                border-color: rgba(67,97,238,.75);
+                box-shadow: 0 0 0 4px rgba(67,97,238,.12);
+            }
+
+        .checkbox-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 14px;
+            cursor: pointer;
+            background: rgba(248,249,250,.85);
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(233,236,239,.9);
+            user-select: none;
+        }
+
+            .checkbox-wrap input {
+                width: auto;
+                margin: 0;
+            }
+
+        button {
+            width: 100%;
+            padding: 14px 14px;
+            margin-top: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.18s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+      
+        #searchBtn {
+            color: white;
+            background: var(--primary);
+            box-shadow: 0 14px 30px rgba(67,97,238,.25);
+        }
+
+        
+        #btn {
+            background: transparent;
+            color: var(--success);
+            border: 2px solid var(--success);
+        }
+
+            #btn:hover {
+                background: rgba(16,185,129,.10);
+            }
+
+        button:hover {
+            transform: translateY(-2px);
+            opacity: 0.96;
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background: rgba(222,226,230,.9);
+            margin: 18px 0;
+        }
+
+      
+        .input-group {
+            position: relative;
+            margin-top: 6px;
+        }
+
+            .input-group i {
+                position: absolute;
+                left: 14px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #9aa3af;
+                font-size: 16px;
+                pointer-events: none;
+                z-index: 10;
+            }
+
+            .input-group input, .input-group select {
+                padding-left: 44px;
+            }
+
+            .input-group:focus-within i {
+                color: var(--primary);
+            }
+
+        
+        .info {
+            margin-top: 14px;
+            padding: 12px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            border: 1px solid rgba(233,236,239,.9);
+        }
+
+            .info.loading {
+                background: rgba(224,242,254,.9);
+                color: #0369a1;
+            }
+
+            .info.success {
+                background: rgba(220,252,231,.9);
+                color: #166534;
+            }
+
+            .info.error {
+                background: rgba(254,226,226,.9);
+                color: #991b1b;
+            }
+
+        
+        .results-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+            margin-bottom: 6px;
+            color: rgba(43,45,66,.7);
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+
+        .results {
+            margin-top: 6px;
+            max-height: 220px;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 4px;
+        }
+
+        .result-item {
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: rgba(255,255,255,.9);
+            border: 1px solid rgba(233,236,239,.95);
+            cursor: pointer;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+            .result-item:hover {
+                transform: translateY(-1px);
+            }
+
+        .result-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            flex: 0 0 10px;
+            background: #94a3b8;
+            box-shadow: 0 8px 20px rgba(0,0,0,.12);
+        }
+
+        .result-name {
+            font-weight: 700;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 240px;
+        }
+
+        .result-action {
+            color: rgba(43,45,66,.5);
+            flex: 0 0 auto;
+        }
+
+        .result-item.active {
+            border-color: rgba(67,97,238,.55);
+            box-shadow: 0 10px 26px rgba(67,97,238,.14);
+        }
+
+        .small {
+            font-size: 12px;
+            color: rgba(43,45,66,.45);
+            margin-top: 14px;
+            text-align: center;
+        }
+
+    
+        @media (max-width: 900px) {
+            body {
+                padding: 12px;
+            }
+
+            .wrap {
+                flex-direction: column;
+            }
+
+            .panel {
+                width: 100%;
+                order: 2;
+            }
+
+            #map {
+                min-height: 420px;
+                order: 1;
+            }
+
+            .slogan {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="brand-container">
+        <div class="brand">
+            <i class="fa-solid fa-map-location-dot brand-icon"></i>
+            <div class="brand-text">Rota<span style="color: #93c5fd;">Dışı</span></div>
+        </div>
+        <div class="slogan">Kaybolmak hiç bu kadar planlı olmamıştı</div>
+    </div>
+
+    <div class="wrap">
+        <div class="panel">
+
+            <label>Şehir Adı</label>
+            <div class="input-group">
+                <input id="cityInput" placeholder="Örn: Ankara" />
+                <i class="fa-solid fa-city"></i>
+            </div>
+
+            <label>Kategori</label>
+            <div class="input-group">
+                <select id="category">
+                    <option value="history">Tarihi Yerler</option>
+                    <option value="tourism">Turistik Yerler</option>
+                    <option value="nature">Doğa Yerleri</option>
+                </select>
+                <i class="fa-solid fa-list"></i>
+            </div>
+
+            <label class="checkbox-wrap">
+                <input type="checkbox" id="includeWorship" />
+                <span><i class="fa-solid fa-mosque" style="margin-right:6px; color:#9aa3af;"></i> Dini Yapıları Dahil Et</span>
+            </label>
+
+            <label>Mekan Adı (Opsiyonel)</label>
+            <div class="input-group">
+                <input id="placeQuery" placeholder="Örn: Anıtkabir" />
+                <i class="fa-solid fa-magnifying-glass-location"></i>
+            </div>
+
+            <button id="searchBtn" type="button">
+                <i class="fa-solid fa-search"></i> Şehri Keşfet
+            </button>
+
+            <hr />
+
+            <label>Başlangıç Noktası</label>
+            <div class="input-group">
+                <select id="start"></select>
+                <i class="fa-solid fa-location-dot"></i>
+            </div>
+
+            <label>Bitiş Noktası</label>
+            <div class="input-group">
+                <select id="end"></select>
+                <i class="fa-solid fa-flag-checkered"></i>
+            </div>
+
+            <label>Ulaşım Türü</label>
+            <div class="input-group">
+                <select id="travelMode">
+                    <option value="walking">Yürüyerek</option>
+                    <option value="driving">Arabayla</option>
+                </select>
+                <i class="fa-solid fa-car-side"></i>
+            </div>
+            <button id="locBtn" type="button" style="margin-top:12px;background:transparent;color:var(--info);border:2px solid var(--info);">
+                <i class="fa-solid fa-location-crosshairs"></i> Konumumu Bul
+            </button>
+            <button id="btn" type="button">
+                <i class="fa-solid fa-route"></i> Rotayı Çiz
+            </button>
+
+            <div class="info loading" id="info">
+                <i class="fa-solid fa-circle-info"></i> Önce şehir aratıp mekanları getirin.
+            </div>
+
+            <div class="results-title">
+                <span>Bulunan Yerler</span>
+                <span id="resultsCount" style="color: rgba(43,45,66,.55); font-weight:700;">0</span>
+            </div>
+            <div id="results" class="results"></div>
+
+            <div class="small">RotaDışı © 2025 - Macera Başlasın</div>
+        </div>
+
+        <div id="map"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("JS Başlatıldı - GLOBAL ARAMA MODU 🌍");
+
+           
+            const map = L.map('map').setView([39.9334, 32.8597], 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+       
+            const cityInput = document.getElementById("cityInput");
+            const categorySel = document.getElementById("category");
+            const placeQueryEl = document.getElementById("placeQuery");
+            const includeWorshipEl = document.getElementById("includeWorship");
+            const searchBtn = document.getElementById("searchBtn");
+            const startSel = document.getElementById("start");
+            const endSel = document.getElementById("end");
+            const infoEl = document.getElementById("info");
+            const routeBtn = document.getElementById("btn");
+            const resultsEl = document.getElementById("results");
+            const resultsCountEl = document.getElementById("resultsCount");
+            const travelModeEl = document.getElementById("travelMode");
+            const locBtn = document.getElementById("locBtn");
+
+
+           
+            let currentPlaces = [];
+            let currentCityName = "";
+            let placeMarkers = [];       
+            let markersByIndex = [];     
+            let routeLine = null;
+            let startMarker = null;
+            let endMarker = null;
+            let activeIndex = null;
+            let userLocation = null;     
+            let userMarker = null;
+            let accuracyCircle = null;
+
+
+           
+            function setInfo(type, html) {
+                infoEl.className = `info ${type}`;
+                infoEl.innerHTML = html;
+            }
+
+           
+            function getCategoryColor(cat) {
+                if (cat === "history") return "#7c3aed";  
+                if (cat === "tourism") return "#2563eb";   
+                if (cat === "nature") return "#16a34a";   
+                return "#64748b";
+            }
+
+           
+            function clearMarkers() {
+                placeMarkers.forEach(m => map.removeLayer(m));
+                placeMarkers = [];
+                markersByIndex = [];
+                activeIndex = null;
+                resultsEl.innerHTML = "";
+                resultsCountEl.textContent = "0";
+            }
+            function clearRoute() {
+                if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
+                if (startMarker) { map.removeLayer(startMarker); startMarker = null; }
+                if (endMarker) { map.removeLayer(endMarker); endMarker = null; }
+            }
+
+            function fillDropdowns(places) {
+                startSel.innerHTML = "";
+                endSel.innerHTML = "";
+
+               
+                if (userLocation) {
+                    const u = document.createElement("option");
+                    u.value = "__USER__";
+                    u.textContent = "📍 Aktif Konumum";
+                    startSel.appendChild(u);
+                }
+
+                places.forEach((p, i) => {
+                    const o1 = document.createElement("option");
+                    o1.value = i; o1.textContent = p.name;
+                    startSel.appendChild(o1);
+
+                    const o2 = document.createElement("option");
+                    o2.value = i; o2.textContent = p.name;
+                    endSel.appendChild(o2);
+                });
+
+                if (places.length > 1) endSel.value = "1";
+            }
+
+
+            
+            function renderResults(places, selectedCat) {
+                resultsEl.innerHTML = "";
+                resultsCountEl.textContent = String(places.length);
+
+                if (!places.length) return;
+
+                const color = getCategoryColor(selectedCat);
+
+                places.forEach((p, i) => {
+                    const item = document.createElement("div");
+                    item.className = "result-item";
+                    item.dataset.index = String(i);
+
+                    item.innerHTML = `
+                <div class="result-left">
+                  <span class="dot" style="background:${color}"></span>
+                  <div class="result-name" title="${p.name}">${p.name}</div>
+                </div>
+                <div class="result-action"><i class="fa-solid fa-location-crosshairs"></i></div>
+              `;
+
+                    item.addEventListener("click", () => {
+                        focusPlace(i);
+                    });
+
+                    resultsEl.appendChild(item);
+                });
+            }
+
+           
+            function focusPlace(i) {
+                const marker = markersByIndex[i];
+                const place = currentPlaces[i];
+                if (!marker || !place) return;
+
+              
+                [...resultsEl.querySelectorAll(".result-item")].forEach(el => el.classList.remove("active"));
+                const activeEl = resultsEl.querySelector(`.result-item[data-index="${i}"]`);
+                if (activeEl) {
+                    activeEl.classList.add("active");
+                    activeEl.scrollIntoView({ block: "nearest", behavior: "smooth" });
+                }
+
+                
+                if (activeIndex !== null && markersByIndex[activeIndex]) {
+                    markersByIndex[activeIndex].setStyle({ radius: 8, weight: 2 });
+                }
+                marker.setStyle({ radius: 11, weight: 3 });
+                activeIndex = i;
+
+                map.flyTo([place.lat, place.lng], Math.max(map.getZoom(), 14), { duration: 0.6 });
+                marker.openPopup();
+            }
+
+           
+            async function searchDirectLocation(query) {
+              
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&accept-language=tr`;
+                try {
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    return data;
+                } catch (err) { return []; }
+            }
+
+          
+            async function fetchPlacesFromOverpass(centerLat, centerLng, category, radius) {
+                const nwr = (selector) => `
+              node${selector}(around:${radius},${centerLat},${centerLng});
+              way${selector}(around:${radius},${centerLat},${centerLng});
+              relation${selector}(around:${radius},${centerLat},${centerLng});
+            `;
+
+                let queryBody = "";
+
+                if (category === "history") {
+                    queryBody += nwr(`["historic"]`);
+                    queryBody += nwr(`["tourism"="museum"]`);
+                } else if (category === "tourism") {
+                    queryBody += nwr(`["tourism"]`);
+                    queryBody += nwr(`["leisure"="park"]`);
+                    queryBody += nwr(`["leisure"="resort"]`);
+                    queryBody += nwr(`["place"="square"]`);
+                } else if (category === "nature") {
+                    queryBody += nwr(`["natural"]`);
+                    queryBody += nwr(`["waterway"="waterfall"]`);
+                    queryBody += nwr(`["water"]`);
+                    queryBody += nwr(`["leisure"="garden"]`);
+                    queryBody += nwr(`["leisure"="nature_reserve"]`);
+                    queryBody += nwr(`["boundary"="national_park"]`);
+                }
+
+                if (includeWorshipEl.checked) {
+                    queryBody += nwr(`["amenity"="place_of_worship"]`);
+                }
+
+                if (!queryBody) return [];
+
+                const fullQuery = `[out:json][timeout:25];( ${queryBody} ); out center;`;
+
+                try {
+                    const res = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", body: fullQuery });
+                    const data = await res.json();
+                    if (!data || !data.elements) return [];
+
+                    return data.elements.map(x => {
+                        const tags = x.tags || {};
+                        const name = tags.name || tags["name:tr"] || tags["name:en"];
+                        const latRaw = x.lat ?? (x.center && x.center.lat);
+                        const lngRaw = x.lon ?? (x.center && x.center.lon);
+
+                        const lat = Number(latRaw);
+                        const lng = Number(lngRaw);
+
+                        if (!name || !Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+                        if (tags.tourism === "hotel" || tags.tourism === "guest_house") return null;
+
+                        return { name, lat, lng };
+                    }).filter(Boolean);
+                } catch (err) { return []; }
+            }
+
+            
+            function addPlaceMarker(place, index, selectedCat) {
+                const color = getCategoryColor(selectedCat);
+
+                const marker = L.circleMarker([place.lat, place.lng], {
+                    radius: 8,
+                    color: color,
+                    weight: 2,
+                    fillColor: color,
+                    fillOpacity: 0.6
+                })
+                    .addTo(map)
+                    .bindPopup(`<b>${place.name}</b>`);
+
+                marker.on("click", () => focusPlace(index));
+
+                placeMarkers.push(marker);
+                markersByIndex[index] = marker;
+            }
+
+           
+            async function searchCityAndLoadPlaces() {
+                const cityName = cityInput.value.trim();
+                const specificPlaceName = placeQueryEl.value.trim();
+                const selectedCat = categorySel.value;
+
+                if (!cityName) { setInfo("error", "Şehir adı girin."); return; }
+
+                setInfo("loading", `<i class="fa-solid fa-spinner fa-spin"></i> Aranıyor...`);
+                clearMarkers();
+                clearRoute();
+
+                let places = [];
+                let mapCenter = null;
+
+              
+                if (specificPlaceName) {
+                    
+                    const query = `${specificPlaceName}, ${cityName}`;
+                    setInfo("loading", `<i class="fa-solid fa-spinner fa-spin"></i> "${query}" aranıyor...`);
+                    const results = await searchDirectLocation(query);
+
+                    if (results.length > 0) {
+                        const best = results[0];
+                        mapCenter = [parseFloat(best.lat), parseFloat(best.lon)];
+                        currentCityName = cityName;
+                        places.push({
+                            name: best.display_name.split(",")[0],
+                            lat: parseFloat(best.lat),
+                            lng: parseFloat(best.lon)
+                        });
+                    } else {
+                        setInfo("error", `"${specificPlaceName}" bulunamadı.`);
+                        return;
+                    }
+                } else {
+                
+                    const cityResults = await searchDirectLocation(cityName);
+
+                    if (!cityResults.length) { setInfo("error", "Şehir bulunamadı."); return; }
+
+                   
+                    const cityGeo = cityResults.find(r => r.type === "administrative" || r.type === "city") || cityResults[0];
+                    mapCenter = [parseFloat(cityGeo.lat), parseFloat(cityGeo.lon)];
+                    currentCityName = cityGeo.display_name;
+
+                    const radiuses = [10000, 30000, 100000];
+
+                    for (let r of radiuses) {
+                        setInfo("loading", `<i class="fa-solid fa-spinner fa-spin"></i> ${cityName} taranıyor... (Mesafe: ${r / 1000} km)`);
+                        const results = await fetchPlacesFromOverpass(mapCenter[0], mapCenter[1], selectedCat, r);
+
+                        const seen = new Set(places.map(p => p.name));
+                        results.forEach(p => {
+                            if (!seen.has(p.name)) { seen.add(p.name); places.push(p); }
+                        });
+
+                        if (places.length >= 3) break;
+                    }
+
+                    places = places.slice(0, 50);
+                }
+
+                if (places.length === 0) {
+                    setInfo("error", `<b>${currentCityName}</b> için bu kategoride sonuç bulunamadı.<br>Daha genel bir kategori deneyebilirsin.`);
+                    return;
+                }
+
+               
+                map.setView(mapCenter, specificPlaceName ? 15 : 10);
+                const bounds = L.latLngBounds();
+
+                places.forEach((p, idx) => {
+                    addPlaceMarker(p, idx, selectedCat);
+                    bounds.extend([p.lat, p.lng]);
+                });
+
+                if (!specificPlaceName) map.fitBounds(bounds, { padding: [50, 50] });
+
+                currentPlaces = places;
+                fillDropdowns(places);
+                renderResults(places, selectedCat);
+
+                setInfo("success", `<i class="fa-solid fa-check"></i> <b>Şehir:</b> ${cityName}<br><b>Bulunan:</b> ${places.length} yer`);
+
+               
+                if (places.length) focusPlace(0);
+            }
+
+           
+
+            function fmt(n) {
+                if (n === undefined || n === null) return "0.000000";
+                let val = (typeof n === "string") ? parseFloat(n.replace(",", ".")) : Number(n);
+
+                if (!Number.isFinite(val)) {
+                    console.error("Geçersiz koordinat:", n);
+                    return "0.000000";
+                }
+                return val.toFixed(6);
+            }
+
+            function getServiceUrl(profile, serviceType) {
+               
+                if (profile === "walking") {
+                    return `https://routing.openstreetmap.de/routed-foot/${serviceType}/v1/foot`;
+                } else {
+                    return `https://router.project-osrm.org/${serviceType}/v1/driving`;
+                }
+            }
+
+            async function osrmNearest(profile, lng, lat) {
+                const baseUrl = getServiceUrl(profile, "nearest");
+                const url = `${baseUrl}/${fmt(lng)},${fmt(lat)}?number=1`;
+
+                try {
+                    const res = await fetch(url);
+                    const data = await res.json();
+
+                    if (!data.waypoints || data.waypoints.length === 0) {
+                        return { ok: false };
+                    }
+
+                    const wp = data.waypoints[0];
+                    return {
+                        ok: true,
+                        snappedLng: wp.location[0],
+                        snappedLat: wp.location[1],
+                        snapDist: wp.distance
+                    };
+                } catch (err) {
+                    console.error(`Nearest Hatası (${profile}):`, err);
+                    return { ok: false };
+                }
+            }
+
+            async function osrmRoute(profile, sLng, sLat, eLng, eLat) {
+                const baseUrl = getServiceUrl(profile, "route");
+                const startCoord = `${fmt(sLng)},${fmt(sLat)}`;
+                const endCoord = `${fmt(eLng)},${fmt(eLat)}`;
+
+                const url = `${baseUrl}/${startCoord};${endCoord}?overview=full&geometries=geojson`;
+
+                console.log(`Rota İsteği (${profile}):`, url);
+
+                try {
+                    const res = await fetch(url);
+                    const data = await res.json();
+
+                    if (data.code !== "Ok") {
+                        console.warn(`OSRM API Hatası (${profile}):`, data.message);
+                        return { url, data, route: null };
+                    }
+
+                    return { url, data, route: data.routes[0] };
+                } catch (err) {
+                    console.error(`Fetch Hatası (${profile}):`, err);
+                    return { url, data: null, route: null };
+                }
+            }
+
+            
+
+            async function drawRoute() {
+                if (!currentPlaces || currentPlaces.length < 1) {
+                    alert("Önce şehir aratıp mekanları getirin.");
+                    return;
+                }
+
+                const mode = travelModeEl ? travelModeEl.value : "walking";
+
+               
+                let sLat, sLng, sLabel = "Başlangıç";
+                if (startSel.value === "__USER__") {
+                    if (!userLocation) { alert("Başlangıç için önce konumunu bulmalısın."); return; }
+                    sLat = Number(userLocation.lat);
+                    sLng = Number(userLocation.lng);
+                    sLabel = "Başlangıç (Konumum)";
+                } else {
+                    const s = currentPlaces[Number(startSel.value)];
+                    if (!s) { alert("Başlangıç seçimi geçersiz."); return; }
+                    sLat = Number(s.lat);
+                    sLng = Number(s.lng);
+                }
+
+             
+                const e = currentPlaces[Number(endSel.value)];
+                if (!e) { alert("Bitiş seçimi geçersiz."); return; }
+
+                const eLat = Number(e.lat);
+                const eLng = Number(e.lng);
+
+                if (startSel.value !== "__USER__" && startSel.value === endSel.value) {
+                    alert("Başlangıç ve bitiş aynı olamaz.");
+                    return;
+                }
+
+               
+                if (![sLat, sLng, eLat, eLng].every(Number.isFinite)) {
+                    console.log("BAD COORDS:", { sLat, sLng, eLat, eLng, e });
+                    setInfo("error", "Koordinatlar geçersiz (NaN/undefined). Console'a bak.");
+                    return;
+                }
+
+                setInfo("loading", `<i class="fa-solid fa-spinner fa-spin"></i> Rota hesaplanıyor...`);
+
+                try {
+                   
+                    const [wS, wE, dS, dE] = await Promise.all([
+                        osrmNearest("walking", sLng, sLat),
+                        osrmNearest("walking", eLng, eLat),
+                        osrmNearest("driving", sLng, sLat),
+                        osrmNearest("driving", eLng, eLat),
+                    ]);
+
+                    const MAX_SNAP = 1500;
+                    const walkCanSnap = wS.ok && wE.ok && (wS.snapDist ?? 0) <= MAX_SNAP && (wE.snapDist ?? 0) <= MAX_SNAP;
+                    const driveCanSnap = dS.ok && dE.ok && (dS.snapDist ?? 0) <= MAX_SNAP && (dE.snapDist ?? 0) <= MAX_SNAP;
+
+                 
+                    const [walk, drive] = await Promise.all([
+                        osrmRoute("walking",
+                            walkCanSnap ? wS.snappedLng : sLng,
+                            walkCanSnap ? wS.snappedLat : sLat,
+                            walkCanSnap ? wE.snappedLng : eLng,
+                            walkCanSnap ? wE.snappedLat : eLat
+                        ),
+                        osrmRoute("driving",
+                            driveCanSnap ? dS.snappedLng : sLng,
+                            driveCanSnap ? dS.snappedLat : sLat,
+                            driveCanSnap ? dE.snappedLng : eLng,
+                            driveCanSnap ? dE.snappedLat : eLat
+                        )
+                    ]);
+
+                    let chosen = (mode === "driving") ? drive : walk;
+                    let chosenLabel = (mode === "driving") ? "Arabayla" : "Yürüyerek";
+
+                    if (!chosen.route) {
+                        const alt = (mode === "driving") ? walk : drive;
+                        const altLabel = (mode === "driving") ? "Yürüyerek" : "Arabayla";
+
+                        if (alt.route) {
+                            chosen = alt;
+                            chosenLabel = altLabel;
+                        } else {
+                            const why1 = chosen.data?.message || chosen.data?.code || "NoRoute";
+                            const why2 = alt.data?.message || alt.data?.code || "NoRoute";
+                            setInfo("error", `Rota bulunamadı. (${chosenLabel}: ${why1} | Diğeri: ${why2})`);
+                            return;
+                        }
+                    }
+
+                    clearRoute();
+
+                    startMarker = L.marker([sLat, sLng]).addTo(map).bindPopup(sLabel).openPopup();
+                    endMarker = L.marker([eLat, eLng]).addTo(map).bindPopup("Bitiş");
+
+                    routeLine = L.geoJSON(chosen.route.geometry, { color: "red", weight: 5 }).addTo(map);
+                    map.fitBounds(routeLine.getBounds());
+
+                    const walkMin = walk.route ? Math.round(walk.route.duration / 60) : null;
+                    const driveMin = drive.route ? Math.round(drive.route.duration / 60) : null;
+
+                    setInfo(
+                        "success",
+                        `<i class="fa-solid fa-route"></i> <b>Çizilen:</b> ${chosenLabel}<br>` +
+                        `<b>Yürüyerek:</b> ${walkMin ?? "-"} dk • ${((walk.route?.distance ?? 0) / 1000).toFixed(2)} km<br>` +
+                        `<b>Arabayla:</b> ${driveMin ?? "-"} dk • ${((drive.route?.distance ?? 0) / 1000).toFixed(2)} km`
+                    );
+
+                } catch (err) {
+                    console.error(err);
+                    setInfo("error", `Hata: ${err.message}`);
+                }
+            }
+
+            async function getUserLocationAndShow() {
+                if (!navigator.geolocation) {
+                    setInfo("error", "Tarayıcı konum özelliğini desteklemiyor.");
+                    return;
+                }
+
+                setInfo("loading", `<i class="fa-solid fa-spinner fa-spin"></i> Konum alınıyor...`);
+
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const lat = pos.coords.latitude;
+                        const lng = pos.coords.longitude;
+                        const acc = pos.coords.accuracy;
+
+                        userLocation = { lat, lng, accuracy: acc };
+
+                        
+                        if (userMarker) map.removeLayer(userMarker);
+                        if (accuracyCircle) map.removeLayer(accuracyCircle);
+
+                        userMarker = L.marker([lat, lng]).addTo(map).bindPopup("📍 Aktif Konumum");
+                        accuracyCircle = L.circle([lat, lng], {
+                            radius: Math.max(20, acc),
+                            color: "#0ea5e9",
+                            weight: 2,
+                            fillOpacity: 0.12
+                        }).addTo(map);
+
+                        map.flyTo([lat, lng], Math.max(map.getZoom(), 15), { duration: 0.6 });
+                        userMarker.openPopup();
+
+                      
+                        upsertUserLocationOption();
+                        if (currentPlaces && currentPlaces.length) fillDropdowns(currentPlaces);
+
+
+                        setInfo("success", `<i class="fa-solid fa-location-crosshairs"></i> Konum bulundu. Başlangıç olarak seçebilirsin.`);
+                    },
+                    (err) => {
+                        console.error(err);
+                        setInfo("error", "Konum alınamadı. Tarayıcı izinlerini kontrol et.");
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+                );
+            }
+
+            function upsertUserLocationOption() {
+                if (!userLocation) return;
+
+               
+                let opt = startSel.querySelector('option[value="__USER__"]');
+                if (!opt) {
+                    opt = document.createElement("option");
+                    opt.value = "__USER__";
+                    opt.textContent = "📍 Aktif Konumum";
+                   
+                    startSel.insertBefore(opt, startSel.firstChild);
+                } else {
+                    opt.textContent = "📍 Aktif Konumum";
+                }
+
+              
+                startSel.value = "__USER__";
+            }
+            function updateTravelIcon() {
+                const icon = travelModeEl.parentElement.querySelector("i");
+                if (!icon) return;
+
+                icon.className = (travelModeEl.value === "driving")
+                    ? "fa-solid fa-car-side"
+                    : "fa-solid fa-person-walking";
+            }
+
+            
+            updateTravelIcon();
+
+           
+            travelModeEl.addEventListener("change", updateTravelIcon);
+
+            searchBtn.addEventListener("click", searchCityAndLoadPlaces);
+            routeBtn.addEventListener("click", drawRoute);
+            locBtn.addEventListener("click", getUserLocationAndShow);
+        });
+    </script>
+</body>
+</html>
